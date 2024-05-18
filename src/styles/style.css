@@ -1,0 +1,332 @@
+:root{
+    --nav-background-color: #DC144F;
+    --nav-text-color: #fff;
+    --main-background-color: #e7e5e4;
+    --item-background-color: #fafaf9;
+    --hover-item-color:#c50b46;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto; /* Three rows: header, main content, footer */
+}
+
+header {
+    grid-row: 1; /* Header takes the first row */
+    background-color: var(--nav-background-color);
+    color: var(--nav-text-color);
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: 1.5rem;
+    border-bottom: black 2px solid;
+}
+
+.header-title {
+    font-size: 2.2rem;
+    margin: 0.5rem;
+    flex-grow: 1; /* Allow the title to grow and take the available space */
+}
+
+.theme-switch {
+    display: flex;
+    align-items: center;
+}
+
+#menuBtn{
+    background-color: inherit;
+    cursor: pointer;
+    border: 0;
+}
+
+
+#menuBtn img{
+    height: 25px;
+    width: 25px;
+}
+
+
+.sidebar-hidden {
+    transform: translateX(-100%); /* Move the sidebar off-screen */
+}
+
+
+/* Navigation bar */
+
+nav {
+    transition: transform 0.3s ease; /* Adding transition for smoother animation */
+    transform: translateX(0); /* Initial position */
+    transform: translateY(0);
+}
+
+#navigation-bar {
+    background-color: var(--nav-background-color);
+    max-width: 400px; /* Set the width of the sidebar */
+    width: calc(100% - 40px); /* 40px is padding from both sides */
+    position: static; /* Fixed position so it stays in place */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 20px;
+}
+
+#navigation-bar  ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    border: 0;
+}
+
+#navigation-bar  ul li a {
+    display: block;
+    color: var(--nav-text-color);
+    padding: 15px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 20px;
+}
+
+
+#navigation-bar  ul li a:hover {
+    background-color: var(--hover-item-color);
+}
+
+.add-project-btn{
+    margin-top: 10px;
+    padding-inline: 15px;
+    list-style-type: none;
+    width: 100%;
+    height: 45px;
+    font-size: 20px;
+    border: 0;
+    border-radius: 5px;
+    background-color: inherit;
+}
+
+.add-project-btn:hover {
+    background-color: var(--hover-item-color);
+    
+}
+.add-project-btn span{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    color: var(--nav-text-color);
+}
+
+
+.add-project-btn span img{
+    width: 30px;
+    height: 30px;
+    margin-right: 35px;
+    color: var(--nav-text-color);
+    border: black solid 3px;
+    border-radius: 50%;
+}
+
+.navigation-title{
+    font-size: 30px;
+    font-weight: bold;
+    border-bottom: black 2px solid;
+    margin-block: 15px;
+}
+
+
+/* Main */
+
+main {
+    grid-row: 2/3; /* Main content takes the second row */
+    background-color: var(--main-background-color);
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+#content{
+    display: flex;
+    flex-direction: column;
+    margin-inline: 3rem;
+    margin-block: 1.5rem;
+    width: 100%;
+    background-color: var(--main-background-color);
+}
+
+#project-title{
+    font-size: 3rem;
+    margin: 0;
+    padding: 1.2rem;
+    border-radius: 5px;
+    max-height: 4rem;
+    background-color: var(--nav-background-color);
+    color: var(--nav-text-color);
+}
+
+.task-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-block: 1.5rem;
+    padding-inline: 0.8rem;
+    min-width:420px ;
+    border-radius: 5px;
+    background-color: var(--nav-background-color);
+}
+
+.task-container .left-side{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+
+.task-container .right-side{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+
+
+.task-checkbox {
+    width: 1rem;
+    height: 1rem;
+    background-color: #fff;
+    border: 1px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* All checked elements */
+
+.checked{
+    opacity: 0.6;
+}
+
+.checked > .task-checkbox{
+    background-color: #fb3868;
+    background-size: 100%;
+    background-image: url(../assets/check-mark.svg);
+    background-repeat: no-repeat;
+    background-origin:border-box ;
+}
+
+.checked > .task-title{
+    text-decoration: line-through;
+}
+
+/* Importants  */
+.importantBtn{
+    background-image: url(../assets/star.svg);
+    height: 1.2rem;
+    width: 1.2rem;
+    background-repeat: round;
+    background-origin:border-box ;
+    cursor: pointer;
+}
+
+.important{
+    background-image: url(../assets/star_filled.svg);
+}
+
+/* other task buttons */
+.task-editBtn{
+    background-image: url(../assets/edit.svg);
+    height: 1.2rem;
+    width: 1.2rem;
+    background-repeat: round;
+    background-origin:border-box ;
+    cursor: pointer;
+}
+
+.task-deleteBtn{
+    background-image: url(../assets/delete.svg);
+    height: 1.2rem;
+    width: 1.2rem;
+    background-repeat: round;
+    background-origin:border-box ;
+    cursor: pointer;
+}
+
+.task-details{
+    font-size: 0.9rem;
+    padding: 5px;
+    border-radius: 5px;
+    border: black solid 1px;
+}
+
+
+
+#task-adding-btn{
+    position: fixed;
+    bottom: 45px;
+    right: 10px;
+    background-color: var(--nav-background-color);
+    color: var(--nav-text-color);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+#task-adding-btn > img{
+    width: 100%;
+    height: 100%;
+}
+
+/* Footer */
+
+footer {
+    grid-row: 3; /* Footer takes the third row */
+    background-color: var(--nav-background-color);
+    color: var(--nav-text-color);
+    font-size: 1rem;
+    padding: 12px;
+    text-align: center;
+    letter-spacing: 0 1rem;
+    border-top: black 2px solid;
+}
+
+
+
+
+
+@media (max-width: 930px){
+
+    main{
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #navigation-bar{
+        max-width: 100%;
+        padding-top: 0;
+    }
+    
+    .sidebar-hidden {
+        transform: translateY(-100%); /* Move the sidebar off-screen */
+        pointer-events: none;
+        opacity: 0;
+        height: 0;
+    }
+
+    
+
+    #content{
+        width: auto;
+        min-height: 90vh;
+    }
+
+}
