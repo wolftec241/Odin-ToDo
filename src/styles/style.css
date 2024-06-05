@@ -4,6 +4,7 @@
     --main-background-color: #e7e5e4;
     --item-background-color: #fafaf9;
     --hover-item-color:#c50b46;
+    --container-items-color:#fb3868;
 }
 
 
@@ -35,11 +36,6 @@ header {
     flex-grow: 1; /* Allow the title to grow and take the available space */
 }
 
-.theme-switch {
-    display: flex;
-    align-items: center;
-}
-
 #menuBtn{
     background-color: inherit;
     cursor: pointer;
@@ -68,8 +64,8 @@ nav {
 
 #navigation-bar {
     background-color: var(--nav-background-color);
-    max-width: 400px; /* Set the width of the sidebar */
-    width: calc(100% - 40px); /* 40px is padding from both sides */
+    max-width: 330px; /* Set the width of the sidebar */
+    width: calc(60% - 40px); /* 40px is padding from both sides */
     position: static; /* Fixed position so it stays in place */
     overflow-y: auto; /* Enable vertical scrolling */
     padding: 20px;
@@ -96,7 +92,7 @@ nav {
     background-color: var(--hover-item-color);
 }
 
-.add-project-btn{
+#add-project-btn{
     margin-top: 10px;
     padding-inline: 15px;
     list-style-type: none;
@@ -108,11 +104,11 @@ nav {
     background-color: inherit;
 }
 
-.add-project-btn:hover {
+#add-project-btn:hover {
     background-color: var(--hover-item-color);
     
 }
-.add-project-btn span{
+#add-project-btn span{
     display: flex;
     justify-content: left;
     align-items: center;
@@ -120,13 +116,34 @@ nav {
 }
 
 
-.add-project-btn span img{
+#add-project-btn span img{
     width: 30px;
     height: 30px;
     margin-right: 35px;
     color: var(--nav-text-color);
     border: black solid 3px;
     border-radius: 50%;
+}
+
+.creating-project{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    width: 70%;
+    height: 4rem;
+}
+
+.new-project-title{
+    height: 1.5rem;
+}
+
+.creating-project-btns{
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.creating-project-btn{
+    height: 1rem;
 }
 
 .navigation-title{
@@ -213,7 +230,7 @@ main {
 }
 
 .checked > .task-checkbox{
-    background-color: #fb3868;
+    background-color: var(--container-items-color);
     background-size: 100%;
     background-image: url(../assets/check-mark.svg);
     background-repeat: no-repeat;
@@ -262,13 +279,25 @@ main {
     padding: 5px;
     border-radius: 5px;
     border: black solid 1px;
+    cursor: pointer;
 }
 
+.task-date{
+    font-size: 0.9rem;
+    padding: 5px;
+    border-radius: 5px;
+    border: black solid 1px;
+}
+
+.task-date-expose{
+    background-color: var(--nav-background-color);
+    color: white;
+}
 
 
 #task-adding-btn{
     position: fixed;
-    bottom: 45px;
+    bottom: 15px; /* This will be adjusted dynamically */
     right: 10px;
     background-color: var(--nav-background-color);
     color: var(--nav-text-color);
@@ -278,6 +307,7 @@ main {
     height: 60px;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: bottom 0.3s ease; /* Smooth transition for bottom positioning */
 }
 
 
@@ -285,6 +315,137 @@ main {
     width: 100%;
     height: 100%;
 }
+
+
+/* New Task */
+.overlay-new{
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible;
+    opacity: 1;
+    transition: all .3s;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.overlay-new-invisible{
+    visibility: hidden;
+    opacity: 0;
+}
+
+.create-task-container{
+    position: relative;
+    visibility: hidden;
+    height: 30rem;
+    width: 55rem;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.6);
+    background-color: var(--item-background-color);
+    display: flex;
+    flex-flow: column nowrap;
+    transform: scale(0);
+}
+
+.create-task-container-open{
+    transform: scale(1);
+    visibility: visible;
+}
+
+.create-task-container-header{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    background-color: var(--nav-background-color);
+    color: var(--item-background-color);
+}
+
+.create-task-container-title{
+    padding: 10px;
+    margin: 0;
+}
+
+.create-task-container-closer{
+    align-content: center;
+    text-align: center;
+    font-size: 2.5rem;
+    cursor: pointer;
+    width: 3rem;
+}
+
+.create-task-container-content{
+    background-color: var(--main-background-color);
+    color: black;
+    padding: 15px;
+    display: flex;
+    flex-flow:column nowrap ;
+    height: 100%;
+}
+
+.create-task-input{
+    background-color: var(--item-background-color);
+    border: none;
+    font-size: 1.2rem;
+    resize: none;
+    font-family: lato, sans-serif;
+    margin-bottom: 0.5rem;
+}
+
+#create-task-description{
+    height: 8rem;
+    margin-bottom: auto;
+    font-size: 1rem;
+}
+
+.create-task-bottom{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+.create-task-date{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+#create-task-date-input{
+    height: 1.5rem;
+    width: 10rem;
+    text-align: center;
+    border: 1px solid var(--container-items-color);
+    border-radius: 3px;
+    color: var(--container-items-color);
+}
+
+#create-task-submit{
+    height: 1.5rem;
+    min-width: 10rem;
+    width: 50%;
+    text-align: center;
+    align-self: center;
+    margin: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid var(--container-items-color);
+    border-radius: 3px;
+    color: var(--container-items-color);
+}
+
+#create-task-submit:hover{
+    background-color: var(--container-items-color);
+    color: white;
+}
+
 
 /* Footer */
 
@@ -312,6 +473,7 @@ footer {
 
     #navigation-bar{
         max-width: 100%;
+        width: calc(100% - 40px); 
         padding-top: 0;
     }
     
@@ -329,4 +491,11 @@ footer {
         min-height: 90vh;
     }
 
+}
+
+@media(max-width: 420px) {
+    .create-task-bottom{
+        flex-direction: column;
+        justify-content: center;
+    }
 }

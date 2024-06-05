@@ -22,12 +22,11 @@ class Project{
         return this.allTasks;
     }
 
-    deleteTask(task){
-        for(let i=0 ; i < this.allTasks.length; i++){
-            if(this.allTasks[i].getTitle() === task.getTitle()){
-                this.allTasks.splice(i, 1);
-                return true;
-            }
+    deleteTask(task) {
+        const taskIndex = this.allTasks.findIndex(t => t === task);
+        if (taskIndex !== -1) {
+            this.allTasks.splice(taskIndex, 1);
+            return true;
         }
         return false;
     }
