@@ -13,20 +13,23 @@ class DomController {
         window.addEventListener('load', () => this.adjustTaskButtonPosition());
         window.addEventListener('resize', () => this.adjustTaskButtonPosition());
         window.addEventListener('scroll', () => this.adjustTaskButtonPosition());
-        
+
         const menuBtn = document.getElementById("menuBtn");
-        menuBtn.addEventListener("click", () => this.toggleSidebar());
-    }    
-    
+        if (menuBtn) {
+            menuBtn.addEventListener("click", () => this.toggleSidebar());
+        }
+    }
+
     adjustTaskButtonPosition() {
         const taskButton = document.getElementById('task-adding-btn');
         const footer = document.querySelector('footer');
-        const footerRect = footer.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        taskButton.style.bottom = (footerRect.top < windowHeight)
-            ? `${windowHeight - footerRect.top + 15}px`
-            : '15px';
+        if (taskButton && footer) {
+            const footerRect = footer.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            taskButton.style.bottom = (footerRect.top < windowHeight) 
+                ? `${windowHeight - footerRect.top + 15}px`
+                : '15px';
+        }
     }
 
     initializeEventListeners() {
@@ -37,16 +40,24 @@ class DomController {
             const closer = document.querySelector('.create-task-container-closer');
             const addingProjectBtn = document.getElementById("add-project-btn");
 
-            taskButton.addEventListener('click', () => this.openForm(overlay, form));
-            closer.addEventListener('click', () => this.closeForm(overlay, form));
-            form.addEventListener('submit', (event) => {
-                event.preventDefault(); // Prevent the default form submission
-                this.addNewTask();
-                this.closeForm(overlay, form);
-            });
-            addingProjectBtn.addEventListener('click', () => {
-                this.addingNewProject();
-            })
+            if (taskButton && overlay && form && closer) {
+                taskButton.addEventListener('click', () => {
+                    if(this.currentProject){
+                        this.openForm(overlay, form)
+                    }
+                    
+                });
+                closer.addEventListener('click', () => this.closeForm(overlay, form));
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    this.addNewTask();
+                    this.closeForm(overlay, form);
+                });
+            }
+
+            if (addingProjectBtn) {
+                addingProjectBtn.addEventListener('click', () => this.addingNewProject());
+            }
         });
     }
 
@@ -74,14 +85,18 @@ class DomController {
         const task = new Task(titleInput.value, description.value, dueDate.value);
         this.currentProject.addNewTask(task);
         const tasksContainer = document.getElementById("tasks");
-        tasksContainer.appendChild(this.newTaskContainer(task));
+        if (tasksContainer) {
+            tasksContainer.appendChild(this.newTaskContainer(task));
+        }
     }
 
     toggleSidebar() {
         const sidebar = document.getElementById("navigation-bar");
-        sidebar.classList.toggle("sidebar-hidden");
-        sidebar.style.width = sidebar.classList.contains("sidebar-hidden") ? '0' : 'calc(100% - 40px)';
-        sidebar.style.padding = sidebar.classList.contains("sidebar-hidden") ? '0' : '20px';
+        if (sidebar) {
+            sidebar.classList.toggle("sidebar-hidden");
+            sidebar.style.width = sidebar.classList.contains("sidebar-hidden") ? '0' : 'calc(100% - 40px)';
+            sidebar.style.padding = sidebar.classList.contains("sidebar-hidden") ? '0' : '20px';
+        }
     }
 
     markOrUnmark(left, right) {
@@ -94,18 +109,25 @@ class DomController {
         const projectTitle = document.getElementById("project-title");
         const tasksContainer = document.getElementById("tasks");
 
-        projectTitle.textContent = this.currentProject.getName();
+        if (projectTitle) {
+            projectTitle.textContent = this.currentProject.getName();
+        }
+        
         this.deleteAllTasksContainers();
 
-        this.currentProject.getAllTasks().forEach(task => {
-            tasksContainer.appendChild(this.newTaskContainer(task));
-        });
+        if (tasksContainer) {
+            this.currentProject.getAllTasks().forEach(task => {
+                tasksContainer.appendChild(this.newTaskContainer(task));
+            });
+        }
     }
 
     deleteAllTasksContainers() {
         const tasksContainer = document.getElementById("tasks");
-        while (tasksContainer.firstChild) {
-            tasksContainer.removeChild(tasksContainer.firstChild);
+        if (tasksContainer) {
+            while (tasksContainer.firstChild) {
+                tasksContainer.removeChild(tasksContainer.firstChild);
+            }
         }
     }
 
@@ -114,8 +136,6 @@ class DomController {
             taskContainer.parentElement.removeChild(taskContainer);
         }
     }
-
-    deleteProjectContainer
 
     isExpose(date) {
         return !(isBefore(date, new Date()));
@@ -131,25 +151,23 @@ class DomController {
         const rightSide = document.createElement('div');
         rightSide.classList.add("right-side");
 
-        //CheckBox
+        // CheckBox
         const checkboxInput = document.createElement('div');
         checkboxInput.classList.add("task-checkbox");
         checkboxInput.addEventListener('click', () => {
             this.markOrUnmark(leftSide, rightSide);
         });
-
         leftSide.appendChild(checkboxInput);
 
-        //Importans
+        // Important Button
         const importantsBtn = document.createElement('div');
         importantsBtn.classList.add('importantBtn');
         importantsBtn.addEventListener('click', () => {
             importantsBtn.classList.toggle("important");
         });
-
         leftSide.appendChild(importantsBtn);
 
-        //Title
+        // Title
         const title = document.createElement("p");
         title.textContent = task.getTitle();
         title.classList.add("task-title");
@@ -157,7 +175,7 @@ class DomController {
 
         taskContainer.appendChild(leftSide);
 
-        //Detail Btn
+        // Detail Button
         const detailsBtn = document.createElement("div");
         detailsBtn.textContent = "Details";
         detailsBtn.classList.add("task-details");
@@ -166,16 +184,13 @@ class DomController {
         });
         rightSide.appendChild(detailsBtn);
 
-        //To Date
+        // Due Date
         const date = document.createElement("span");
-        date.textContent = this.isExpose(task.getDueDate())?
-        "Expired":
-        format(task.getDueDate(), 'dd/MM/yyyy');
-
+        date.textContent = this.isExpose(task.getDueDate()) ? "Expired" : format(task.getDueDate(), 'dd/MM/yyyy');
         date.classList.add('task-date');
         rightSide.appendChild(date);
 
-        //Edit Btn
+        // Edit Button
         const editBtn = document.createElement("div");
         editBtn.classList.add('task-editBtn');
         editBtn.addEventListener("click", () => {
@@ -183,7 +198,7 @@ class DomController {
         });
         rightSide.appendChild(editBtn);
 
-        //Delete Btn
+        // Delete Button
         const deleteBtn = document.createElement("div");
         deleteBtn.classList.add('task-deleteBtn');
         deleteBtn.addEventListener("click", () => {
@@ -198,38 +213,74 @@ class DomController {
         return taskContainer;
     }
 
-    addingNewProject(){
+    addingNewProject() {
         const projects = document.getElementById('projects');
         const projectContainer = document.createElement('form');
         projectContainer.classList.add('creating-project');
 
         const title = document.createElement('input');
         const buttons = document.createElement('div');
-        const addBtn = document.createElement('div');
-        addBtn.value = "Add";
+        const addBtn = document.createElement('input');
         const cancelBtn = document.createElement('div');
-        cancelBtn.value = "Cancel";
-        
+
         title.classList.add('new-project-title');
+        title.maxLength = 24;
+        title.type = "text";
+        title.placeholder = "Enter Project Name";
+        title.required = true;
+
         buttons.classList.add('creating-project-btns');
         addBtn.classList.add('creating-project-btn');
+        addBtn.setAttribute("id", "addProjectBtn");
+        addBtn.type = "submit";
+        addBtn.value = "Add";
+        addBtn.readOnly = true;
         cancelBtn.classList.add('creating-project-btn');
-
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.readOnly = true;
 
         buttons.appendChild(addBtn);
         buttons.appendChild(cancelBtn);
         projectContainer.appendChild(title);
         projectContainer.appendChild(buttons);
 
-        projects.appendChild(projectContainer);
+        if (projects) {
+            projects.appendChild(projectContainer);
+        }
 
-        addBtn.addEventListener("submit", () =>{
-            projects.appendChild(new Project(title.value));
+        projectContainer.addEventListener("submit", (event) => {
+            event.preventDefault();
+            this.createProjectContainer(new Project(title.value));
             this.deleteCorrectContainer(projectContainer);
         });
+
+        cancelBtn.addEventListener('click', () => {
+            this.deleteCorrectContainer(projectContainer);
+        });
+
+        projectContainer.addEventListener('mouseleave', () => {
+            this.deleteCorrectContainer(projectContainer);
+        });
+
     }
 
+    createProjectContainer(project) {
+        const projects = document.getElementById('projects');
+        const projectElement = document.createElement('div');
+        const projectTitle = document.createElement('div');
+        const projectCloser = document.createElement('div');
 
+        projectElement.classList.add('project');
+        projectTitle.textContent = project.getName();
+        projectCloser.textContent = '×';
+        projectElement.addEventListener('click', () => {
+            this.changeProject(project);
+        });
+        projectElement.appendChild(projectTitle);
+        projectElement.appendChild(projectCloser);
+        projects.appendChild(projectElement);
+    }
+    
 }
 
 export default DomController;

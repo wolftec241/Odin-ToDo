@@ -16,7 +16,7 @@ function init(){
 
     const Project = addNewProject("Test");
     Project.addNewTask('a','b',2);
-    domController.changeProject(Project);
+    domController.createProjectContainer(Project);
 
     
 

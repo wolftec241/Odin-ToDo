@@ -3,6 +3,7 @@ class Task{
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
+        this.isImportant = false;
     }
 
     getTitle(){
@@ -24,6 +25,13 @@ class Task{
     }
     setDueDate(title){
         this.dueDate = dueDate;
+    }
+
+    getIsImportant(){
+        return this.isImportant;
+    }
+    changeIsImportant(){
+        this.isImportant = !(this.isImportant);
     }
 }
 
