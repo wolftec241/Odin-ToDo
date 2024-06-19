@@ -125,19 +125,26 @@ nav {
     border-radius: 50%;
 }
 
-.project{
+.project {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     color: var(--nav-text-color);
     padding: 15px 20px;
     text-decoration: none;
+    font-size: 2rem;
     border-radius: 5px;
-    font-size: 30px;
+    cursor: pointer;
 }
 
-.project:hover{
+.project:hover {
     background-color: var(--hover-item-color); 
 }
+
+.project-closer{
+    font-size: 2.5rem;
+}
+
 
 
 /* Creating new project */
@@ -375,11 +382,13 @@ main {
     opacity: 0;
 }
 
-.create-task-container{
-    position: relative;
+.form-container{
+    position: absolute;
     visibility: hidden;
     height: 30rem;
-    width: 55rem;
+    width: 90%;
+    min-width: 450px;
+    max-width: 1000px;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.6);
@@ -389,12 +398,12 @@ main {
     transform: scale(0);
 }
 
-.create-task-container-open{
+.form-container-open{
     transform: scale(1);
     visibility: visible;
 }
 
-.create-task-container-header{
+.form-container-header{
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -403,12 +412,12 @@ main {
     color: var(--item-background-color);
 }
 
-.create-task-container-title{
+.form-container-title{
     padding: 10px;
     margin: 0;
 }
 
-.create-task-container-closer{
+.form-container-closer{
     align-content: center;
     text-align: center;
     font-size: 2.5rem;
@@ -416,7 +425,7 @@ main {
     width: 3rem;
 }
 
-.create-task-container-content{
+.form-container-content{
     background-color: var(--main-background-color);
     color: black;
     padding: 15px;
@@ -425,7 +434,7 @@ main {
     height: 100%;
 }
 
-.create-task-input{
+.form-container-content-input{
     background-color: var(--item-background-color);
     border: none;
     font-size: 1.2rem;
@@ -434,25 +443,25 @@ main {
     margin-bottom: 0.5rem;
 }
 
-#create-task-description{
+#task-form-description{
     height: 8rem;
     margin-bottom: auto;
     font-size: 1rem;
 }
 
-.create-task-bottom{
+.container-bottom{
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
 }
 
-.create-task-date{
+.form-container-date{
     display: flex;
     justify-content: left;
     align-items: center;
 }
 
-#create-task-date-input{
+.form-date-input{
     height: 1.5rem;
     width: 10rem;
     text-align: center;
@@ -461,7 +470,7 @@ main {
     color: var(--container-items-color);
 }
 
-#create-task-submit{
+.form-submit{
     height: 1.5rem;
     min-width: 10rem;
     width: 50%;
@@ -476,10 +485,12 @@ main {
     color: var(--container-items-color);
 }
 
-#create-task-submit:hover{
+.form-submit:hover{
     background-color: var(--container-items-color);
     color: white;
 }
+
+
 
 
 /* Footer */

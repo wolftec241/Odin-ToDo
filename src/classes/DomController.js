@@ -1,15 +1,16 @@
-import { format, isBefore } from "date-fns";
+// src/DomController.js
+
+import { format, isAfter, isBefore } from "date-fns";
 import Task from "./Task.js";
 import Project from "./Project.js";
 
 class DomController {
     constructor() {
         this.currentProject = null;
-        this.addingBtnRelocation();
         this.initializeEventListeners();
     }
 
-    addingBtnRelocation() {
+    initializeEventListeners() {
         window.addEventListener('load', () => this.adjustTaskButtonPosition());
         window.addEventListener('resize', () => this.adjustTaskButtonPosition());
         window.addEventListener('scroll', () => this.adjustTaskButtonPosition());
@@ -17,6 +18,62 @@ class DomController {
         const menuBtn = document.getElementById("menuBtn");
         if (menuBtn) {
             menuBtn.addEventListener("click", () => this.toggleSidebar());
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initializeCreatingTaskFormListeners();
+            this.initializeProjectListeners();
+        });
+    }
+
+    initializeCreatingTaskFormListeners() {
+        const taskButton = document.getElementById('task-adding-btn');
+        const overlay = document.querySelector('.overlay-new');
+        const form = document.querySelector('.form-container');
+        const closer = document.querySelector('.form-container-closer');
+        const containerTitle = document.querySelector('.form-container-title');
+
+        if (taskButton && overlay && form && closer && containerTitle) {
+            taskButton.addEventListener('click', () => {
+                if (this.currentProject) {
+                    containerTitle.textContent = 'Creating Task';
+                    this.openForm(overlay, form);
+                }
+            });
+            closer.addEventListener('click', () => this.closeForm(overlay, form));
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                this.addNewTask();
+                this.closeForm(overlay, form);
+            });
+        }
+    }
+
+    initializeEditingTaskFormListeners(task) {
+        if(!task) return null;
+        const overlay = document.querySelector('.overlay-new');
+        const form = document.querySelector('.form-container');
+        const closer = document.querySelector('.form-container-closer');
+        const containerTitle = document.querySelector('.form-container-title');
+
+        if (overlay && form && closer && containerTitle) {
+            if (this.currentProject) {
+                containerTitle.textContent = 'Editing Task';
+                this.openForm(overlay, form);
+            }
+            closer.addEventListener('click', () => this.closeForm(overlay, form));
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                this.addNewTask();
+                this.closeForm(overlay, form);
+            });
+        }
+    }
+
+    initializeProjectListeners() {
+        const addingProjectBtn = document.getElementById("add-project-btn");
+        if (addingProjectBtn) {
+            addingProjectBtn.addEventListener('click', () => this.addingNewProject());
         }
     }
 
@@ -32,64 +89,6 @@ class DomController {
         }
     }
 
-    initializeEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
-            const taskButton = document.getElementById('task-adding-btn');
-            const overlay = document.querySelector('.overlay-new');
-            const form = document.querySelector('.create-task-container');
-            const closer = document.querySelector('.create-task-container-closer');
-            const addingProjectBtn = document.getElementById("add-project-btn");
-
-            if (taskButton && overlay && form && closer) {
-                taskButton.addEventListener('click', () => {
-                    if(this.currentProject){
-                        this.openForm(overlay, form)
-                    }
-                    
-                });
-                closer.addEventListener('click', () => this.closeForm(overlay, form));
-                form.addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    this.addNewTask();
-                    this.closeForm(overlay, form);
-                });
-            }
-
-            if (addingProjectBtn) {
-                addingProjectBtn.addEventListener('click', () => this.addingNewProject());
-            }
-        });
-    }
-
-    openForm(overlay, form) {
-        overlay.classList.remove("overlay-new-invisible");
-        form.classList.add("create-task-container-open");
-    }
-
-    closeForm(overlay, form) {
-        overlay.classList.add("overlay-new-invisible");
-        form.classList.remove("create-task-container-open");
-        form.reset();
-    }
-
-    addNewTask() {
-        const titleInput = document.getElementById('create-task-title');
-        const description = document.getElementById('create-task-description');
-        const dueDate = document.getElementById('create-task-date-input');
-
-        if (!this.currentProject) {
-            console.error('No current project set');
-            return;
-        }
-
-        const task = new Task(titleInput.value, description.value, dueDate.value);
-        this.currentProject.addNewTask(task);
-        const tasksContainer = document.getElementById("tasks");
-        if (tasksContainer) {
-            tasksContainer.appendChild(this.newTaskContainer(task));
-        }
-    }
-
     toggleSidebar() {
         const sidebar = document.getElementById("navigation-bar");
         if (sidebar) {
@@ -99,46 +98,43 @@ class DomController {
         }
     }
 
-    markOrUnmark(left, right) {
-        left.classList.toggle("checked");
-        right.classList.toggle("checked");
+    addNewTask() {
+        const titleInput = document.getElementById('task-form-title');
+        const description = document.getElementById('task-form-description');
+        const dueDate = document.getElementById('create-task-date-input');
+        const tasks = document.getElementById('tasks');
+
+        if (!this.currentProject) {
+            console.error('No current project set');
+            return;
+        }
+
+        const task = new Task(titleInput.value, description.value, dueDate.value);
+        this.currentProject.addNewTask(task);
+        tasks.appendChild(this.newTaskContainer(task));
+    }
+
+    updateTaskContainers() {
+        const tasksContainer = document.getElementById("tasks");
+        if (tasksContainer) {
+            this.deleteAllTasksContainers();
+                if(this.currentProject){
+                this.currentProject.getAllTasks().forEach(task => {
+                    tasksContainer.appendChild(this.newTaskContainer(task));
+                });
+            }
+        }
     }
 
     changeProject(project) {
         this.currentProject = project;
         const projectTitle = document.getElementById("project-title");
-        const tasksContainer = document.getElementById("tasks");
-
+        
         if (projectTitle) {
-            projectTitle.textContent = this.currentProject.getName();
+            projectTitle.textContent = this.currentProject ? this.currentProject.getName() : '';
         }
         
-        this.deleteAllTasksContainers();
-
-        if (tasksContainer) {
-            this.currentProject.getAllTasks().forEach(task => {
-                tasksContainer.appendChild(this.newTaskContainer(task));
-            });
-        }
-    }
-
-    deleteAllTasksContainers() {
-        const tasksContainer = document.getElementById("tasks");
-        if (tasksContainer) {
-            while (tasksContainer.firstChild) {
-                tasksContainer.removeChild(tasksContainer.firstChild);
-            }
-        }
-    }
-
-    deleteCorrectContainer(taskContainer) {
-        if (taskContainer && taskContainer.parentElement) {
-            taskContainer.parentElement.removeChild(taskContainer);
-        }
-    }
-
-    isExpose(date) {
-        return !(isBefore(date, new Date()));
+        this.updateTaskContainers();
     }
 
     newTaskContainer(task) {
@@ -160,12 +156,12 @@ class DomController {
         leftSide.appendChild(checkboxInput);
 
         // Important Button
-        const importantsBtn = document.createElement('div');
-        importantsBtn.classList.add('importantBtn');
-        importantsBtn.addEventListener('click', () => {
-            importantsBtn.classList.toggle("important");
+        const importantBtn = document.createElement('div');
+        importantBtn.classList.add('importantBtn');
+        importantBtn.addEventListener('click', () => {
+            importantBtn.classList.toggle("important");
         });
-        leftSide.appendChild(importantsBtn);
+        leftSide.appendChild(importantBtn);
 
         // Title
         const title = document.createElement("p");
@@ -180,7 +176,7 @@ class DomController {
         detailsBtn.textContent = "Details";
         detailsBtn.classList.add("task-details");
         detailsBtn.addEventListener("click", () => {
-            console.log("Details button clicked");
+            console.log("details");
         });
         rightSide.appendChild(detailsBtn);
 
@@ -194,7 +190,8 @@ class DomController {
         const editBtn = document.createElement("div");
         editBtn.classList.add('task-editBtn');
         editBtn.addEventListener("click", () => {
-            console.log("Edit button clicked");
+            console.log('edit task');
+            this.initializeEditingTaskFormListeners(task);
         });
         rightSide.appendChild(editBtn);
 
@@ -202,7 +199,6 @@ class DomController {
         const deleteBtn = document.createElement("div");
         deleteBtn.classList.add('task-deleteBtn');
         deleteBtn.addEventListener("click", () => {
-            console.log("Delete button clicked");
             this.deleteCorrectContainer(taskContainer);
             this.currentProject.deleteTask(task);
         });
@@ -211,6 +207,37 @@ class DomController {
         taskContainer.appendChild(rightSide);
 
         return taskContainer;
+    }
+
+    markOrUnmark(left, right) {
+        left.classList.toggle("checked");
+        right.classList.toggle("checked");
+    }
+
+    deleteCorrectContainer(container) {
+        if (container && container.parentElement) {
+            container.parentElement.removeChild(container);
+        }
+    }
+
+    deleteAllTasksContainers() {
+        const tasksContainer = document.getElementById("tasks");
+        if (tasksContainer) {
+            while (tasksContainer.firstChild) {
+                tasksContainer.removeChild(tasksContainer.firstChild);
+            }
+        }
+    }
+
+    openForm(overlay, form) {
+        overlay.classList.remove("overlay-new-invisible");
+        form.classList.add("form-container-open");
+    }
+
+    closeForm(overlay, form) {
+        overlay.classList.add("overlay-new-invisible");
+        form.classList.remove("form-container-open");
+        form.reset();
     }
 
     addingNewProject() {
@@ -234,10 +261,8 @@ class DomController {
         addBtn.setAttribute("id", "addProjectBtn");
         addBtn.type = "submit";
         addBtn.value = "Add";
-        addBtn.readOnly = true;
         cancelBtn.classList.add('creating-project-btn');
         cancelBtn.textContent = "Cancel";
-        cancelBtn.readOnly = true;
 
         buttons.appendChild(addBtn);
         buttons.appendChild(cancelBtn);
@@ -261,7 +286,6 @@ class DomController {
         projectContainer.addEventListener('mouseleave', () => {
             this.deleteCorrectContainer(projectContainer);
         });
-
     }
 
     createProjectContainer(project) {
@@ -271,16 +295,32 @@ class DomController {
         const projectCloser = document.createElement('div');
 
         projectElement.classList.add('project');
+        projectTitle.classList.add('project-title');
+        projectCloser.classList.add('project-closer');
+
         projectTitle.textContent = project.getName();
         projectCloser.textContent = '×';
-        projectElement.addEventListener('click', () => {
+
+        projectTitle.addEventListener('click', () => {
             this.changeProject(project);
         });
+
+        projectCloser.addEventListener('click', () => {
+            this.deleteCorrectContainer(projectElement);
+            this.changeProject(null);
+        });
+
         projectElement.appendChild(projectTitle);
         projectElement.appendChild(projectCloser);
-        projects.appendChild(projectElement);
+
+        if (projects) {
+            projects.appendChild(projectElement);
+        }
     }
-    
+
+    isExpose(date) {
+        return isAfter(new Date(), date);
+    }
 }
 
 export default DomController;

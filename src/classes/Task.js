@@ -1,40 +1,53 @@
-class Task{
-    constructor(title, description, dueDate){
+// src/Task.js
+
+class Task {
+    constructor(title, description, dueDate) {
+        this.id = Task.generateId();
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.isImportant = false;
     }
 
-    getTitle(){
+    static generateId() {
+        return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    getId() {
+        return this.id;
+    }
+
+    getTitle() {
         return this.title;
     }
-    setTitle(title){
+
+    getDescription() {
+        return this.description;
+    }
+
+    getDueDate() {
+        return this.dueDate;
+    }
+
+    setTitle(title) {
         this.title = title;
     }
 
-    getDescription(){
-        return this.description;
-    }
-    setDescription(description){
+    setDescription(description) {
         this.description = description;
     }
 
-    getDueDate(){
-        return this.dueDate;
-    }
-    setDueDate(title){
+    setDueDate(dueDate) {
         this.dueDate = dueDate;
     }
 
-    getIsImportant(){
+    getIsImportant() {
         return this.isImportant;
     }
-    changeIsImportant(){
-        this.isImportant = !(this.isImportant);
+
+    changeIsImportant() {
+        this.isImportant = !this.isImportant;
     }
 }
-
-
 
 export default Task;

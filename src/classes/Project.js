@@ -1,34 +1,40 @@
+// src/Project.js
+
 import Task from "./Task.js";
 
-class Project{
-    constructor(name){
+class Project {
+    constructor(name) {
         this.allTasks = [];
-        this.name = name
+        this.name = name;
     }
 
-    getName(){
+    getName() {
         return this.name;
     }
 
-    getAllTask(){
+    getAllTasks() {
         return this.allTasks;
     }
 
-    addNewTask(title, description, dueDate) {
-        this.allTasks.push(new Task(title, description, dueDate));
+    createNewTask(title, description, dueDate) {
+        const newTask = new Task(title, description, dueDate);
+        this.allTasks.push(newTask);
+        return newTask;
     }
 
-    getAllTasks(){
-        return this.allTasks;
+    addNewTask(task) {
+        this.allTasks.push(task);
     }
 
     deleteTask(task) {
-        const taskIndex = this.allTasks.findIndex(t => t === task);
-        if (taskIndex !== -1) {
-            this.allTasks.splice(taskIndex, 1);
-            return true;
+        this.allTasks = this.allTasks.filter(t => t.getId() !== task.getId());
+    }
+
+    updateTask(updatedTask) {
+        const index = this.allTasks.findIndex(task => task.getId() === updatedTask.getId());
+        if (index !== -1) {
+            this.allTasks[index] = updatedTask;
         }
-        return false;
     }
 }
 
