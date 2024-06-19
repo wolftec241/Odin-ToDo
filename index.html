@@ -52,36 +52,37 @@
     <footer> Copyright © The Odin Project 2024 </footer>
 
     <div class="overlay-new overlay-new-invisible">
-      <form class="create-task-container ">
-        <div class="create-task-container-header">
-          <h2 class="create-task-container-title">Create a new task</h2>
-          <div class="create-task-container-closer">×</div>
+      <!-- Adding/Editing task container -->
+      <form class="form-container">
+        <div class="form-container-header" >
+          <h2 class="form-container-title"></h2>
+          <div class="form-container-closer">×</div>
         </div>
 
-        <div class="create-task-container-content">
-          <textarea id="create-task-title" 
-          class="create-task-input"
+        <div class="form-container-content">
+          <textarea id="task-form-title" 
+          class="form-container-content-input"
           placeholder="Title: Pay bills" 
           name="create-task" maxlength="40" required=""></textarea>
-          <textarea id="create-task-description"
-          class="create-task-input"
+          <textarea id="task-form-description"
+          class="form-container-content-input"
           placeholder="Details: e.g internet, phone, rent." 
           name="create-task" maxlength="150"></textarea>
 
-          <div class="create-task-bottom">
-            <div class="create-task-date">
-              <div class="create-task-date-title">Due Date: </div>
-              <input id="create-task-date-input" 
+          <div class="container-bottom">
+            <div class="form-container-date">
+              <div class="form-container-date-title">Due Date: </div>
+              <input id="create-task-date-input" class="form-date-input"
               type="date" name="create-task" required="">
             </div>
 
             <input  type="submit"
-            value="Add new task" id="create-task-submit" readonly>
+            value="Add new task" id="form-task-submit" class="form-submit" readonly>
           </div>
-
-
         </div>
       </form>
     </div>
+
+
 <script defer src="main.js"></script></body>
 </html>
