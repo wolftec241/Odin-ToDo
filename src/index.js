@@ -14,10 +14,7 @@ console.log('Formatted Date:', formattedDate);
 function init(){
     const domController = new DomController();
 
-    const Project = addNewProject("Test");
-    Project.createNewTask('a','b',2);
-    domController.createProjectContainer(Project);
-    domController.changeProject(Project);
+
     
 
     

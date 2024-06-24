@@ -17,7 +17,7 @@ class Project {
     }
 
     createNewTask(title, description, dueDate) {
-        const newTask = new Task(title, description, dueDate);
+        const newTask = new Task(title, description, dueDate, this.name);
         this.allTasks.push(newTask);
         return newTask;
     }
@@ -25,6 +25,10 @@ class Project {
     addNewTask(task) {
         this.allTasks.push(task);
     }
+
+    getTaskById(taskId) {
+        return this.allTasks.find(task => task.getId() === taskId);
+    }    
 
     deleteTask(task) {
         this.allTasks = this.allTasks.filter(t => t.getId() !== task.getId());

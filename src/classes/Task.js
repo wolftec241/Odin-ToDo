@@ -1,8 +1,8 @@
 // src/Task.js
 
 class Task {
-    constructor(title, description, dueDate) {
-        this.id = Task.generateId();
+    constructor(title, description, dueDate, projectName) {
+        this.id = Task.generateId(projectName);
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;

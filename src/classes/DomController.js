@@ -7,68 +7,178 @@ import Project from "./Project.js";
 class DomController {
     constructor() {
         this.currentProject = null;
+        this.projects = [];
         this.initializeEventListeners();
+        this.loadFromLocalStorage();
     }
 
     initializeEventListeners() {
         window.addEventListener('load', () => this.adjustTaskButtonPosition());
         window.addEventListener('resize', () => this.adjustTaskButtonPosition());
         window.addEventListener('scroll', () => this.adjustTaskButtonPosition());
-
+    
         const menuBtn = document.getElementById("menuBtn");
         if (menuBtn) {
             menuBtn.addEventListener("click", () => this.toggleSidebar());
         }
-
+    
         document.addEventListener('DOMContentLoaded', () => {
-            this.initializeCreatingTaskFormListeners();
+            this.initializeTaskFormListeners();
             this.initializeProjectListeners();
+    
+            const allTasksLink = document.getElementById('All-tasks');
+            const todayTasksLink = document.getElementById('Today-tasks');
+            const next7DaysTasksLink = document.getElementById('Next-7-days-tasks');
+            const importantTasksLink = document.getElementById('Important-tasks');
+    
+            if (allTasksLink) {
+                allTasksLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.displayAllTasks();
+                });
+            }
+    
+            if (todayTasksLink) {
+                todayTasksLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.displayTodayTasks();
+                });
+            }
+    
+            if (next7DaysTasksLink) {
+                next7DaysTasksLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.displayNext7DaysTasks();
+                });
+            }
+    
+            if (importantTasksLink) {
+                importantTasksLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.displayImportantTasks();
+                });
+            }
         });
     }
-
-    initializeCreatingTaskFormListeners() {
+    
+    initializeTaskFormListeners() {
         const taskButton = document.getElementById('task-adding-btn');
-        const overlay = document.querySelector('.overlay-new');
         const form = document.querySelector('.form-container');
         const closer = document.querySelector('.form-container-closer');
         const containerTitle = document.querySelector('.form-container-title');
-
-        if (taskButton && overlay && form && closer && containerTitle) {
+        const formSubmitButton = document.getElementById('form-task-submit');
+    
+        if (taskButton && form && closer && containerTitle && formSubmitButton) {
             taskButton.addEventListener('click', () => {
                 if (this.currentProject) {
-                    containerTitle.textContent = 'Creating Task';
-                    this.openForm(overlay, form);
+                    this.prepareFormForNewTask();
+                    this.openForm();
                 }
             });
-            closer.addEventListener('click', () => this.closeForm(overlay, form));
+    
+            closer.addEventListener('click', () => this.closeForm());
+    
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
-                this.addNewTask();
-                this.closeForm(overlay, form);
+                if (formSubmitButton.value === "Add new task") {
+                    this.addNewTask();
+                } else {
+                    const taskId = formSubmitButton.dataset.taskId;
+                    const task = this.currentProject.getTaskById(taskId);
+                    this.updateTask(task);
+                }
+                this.closeForm(form);
             });
         }
     }
+    
+    
+    prepareFormForNewTask() {
+        const containerTitle = document.querySelector('.form-container-title');
+        const formSubmitButton = document.getElementById('form-task-submit');
+    
+        containerTitle.textContent = 'Creating Task';
+        formSubmitButton.value = 'Add new task';
+        formSubmitButton.removeAttribute('data-task-id');
+    
+        this.clearForm();
+    }
+    
+    prepareFormForEditingTask(task) {
+        const containerTitle = document.querySelector('.form-container-title');
+        const formSubmitButton = document.getElementById('form-task-submit');
+    
+        containerTitle.textContent = 'Editing Task';
+        formSubmitButton.value = 'Save changes';
+        formSubmitButton.dataset.taskId = task.getId();
+    
+        const title = document.getElementById('task-form-title');
+        const description = document.getElementById('task-form-description');
+        const date = document.getElementById('task-form-date');
+    
+        title.textContent = task.getTitle();
+        description.textContent = task.getDescription();
+        date.textContent = task.getDueDate;
+    }
+    
+    
+    clearForm() {
+        const title = document.getElementById('task-form-title');
+        const description = document.getElementById('task-form-description');
+        const date = document.getElementById('task-form-date');
+    
+        title.value = '';
+        description.value = '';
+        date.value = '';
+    }
 
-    initializeEditingTaskFormListeners(task) {
-        if(!task) return null;
+    openForm() {
         const overlay = document.querySelector('.overlay-new');
         const form = document.querySelector('.form-container');
-        const closer = document.querySelector('.form-container-closer');
-        const containerTitle = document.querySelector('.form-container-title');
 
-        if (overlay && form && closer && containerTitle) {
-            if (this.currentProject) {
-                containerTitle.textContent = 'Editing Task';
-                this.openForm(overlay, form);
-            }
-            closer.addEventListener('click', () => this.closeForm(overlay, form));
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                this.addNewTask();
-                this.closeForm(overlay, form);
-            });
-        }
+        overlay.classList.remove("overlay-new-invisible");
+        form.classList.add("form-container-open");
     }
+
+    closeForm() {
+        const overlay = document.querySelector('.overlay-new');
+        const form = document.querySelector('.form-container');
+
+        overlay.classList.add("overlay-new-invisible");
+        form.classList.remove("form-container-open");
+        form.reset();
+    }
+    
+    addNewTask() {
+        if (!this.currentProject) {
+            console.error('No current project set');
+            return;
+        }
+    
+        const titleInput = document.getElementById('task-form-title');
+        const description = document.getElementById('task-form-description');
+        const dueDate = document.getElementById('task-form-date');
+        const tasks = document.getElementById('tasks');
+    
+        const task = new Task(titleInput.value, description.value, new Date(dueDate.value), this.currentProject.getName());
+        this.currentProject.addNewTask(task);
+        tasks.appendChild(this.newTaskContainer(task));
+        this.saveToLocalStorage();
+    }
+    
+    updateTask(task) {
+        const titleInput = document.getElementById('task-form-title');
+        const description = document.getElementById('task-form-description');
+        const dueDate = document.getElementById('task-form-date');
+    
+        task.setTitle(titleInput.value);
+        task.setDescription(description.value);
+        task.setDueDate(new Date(dueDate.value));
+    
+        this.updateTaskContainers();
+        this.saveToLocalStorage();
+    }
+    
 
     initializeProjectListeners() {
         const addingProjectBtn = document.getElementById("add-project-btn");
@@ -98,22 +208,6 @@ class DomController {
         }
     }
 
-    addNewTask() {
-        const titleInput = document.getElementById('task-form-title');
-        const description = document.getElementById('task-form-description');
-        const dueDate = document.getElementById('create-task-date-input');
-        const tasks = document.getElementById('tasks');
-
-        if (!this.currentProject) {
-            console.error('No current project set');
-            return;
-        }
-
-        const task = new Task(titleInput.value, description.value, dueDate.value);
-        this.currentProject.addNewTask(task);
-        tasks.appendChild(this.newTaskContainer(task));
-    }
-
     updateTaskContainers() {
         const tasksContainer = document.getElementById("tasks");
         if (tasksContainer) {
@@ -131,22 +225,27 @@ class DomController {
         const projectTitle = document.getElementById("project-title");
         
         if (projectTitle) {
-            projectTitle.textContent = this.currentProject ? this.currentProject.getName() : '';
+            projectTitle.textContent = this.currentProject ? this.currentProject.getName() : 'All Tasks';
         }
         
-        this.updateTaskContainers();
+        if (project === null) {
+            this.displayAllTasks();
+        } else {
+            this.updateTaskContainers();
+        }
+        this.saveToLocalStorage();
     }
 
     newTaskContainer(task) {
         const taskContainer = document.createElement('div');
         taskContainer.classList.add("task-container");
-
+    
         const leftSide = document.createElement('div');
         leftSide.classList.add("left-side");
-
+    
         const rightSide = document.createElement('div');
         rightSide.classList.add("right-side");
-
+    
         // CheckBox
         const checkboxInput = document.createElement('div');
         checkboxInput.classList.add("task-checkbox");
@@ -154,60 +253,82 @@ class DomController {
             this.markOrUnmark(leftSide, rightSide);
         });
         leftSide.appendChild(checkboxInput);
-
+    
         // Important Button
         const importantBtn = document.createElement('div');
         importantBtn.classList.add('importantBtn');
         importantBtn.addEventListener('click', () => {
             importantBtn.classList.toggle("important");
+            task.changeIsImportant();
+            this.saveToLocalStorage();
         });
+        if (task.getIsImportant()) {
+            importantBtn.classList.add("important");
+        }
         leftSide.appendChild(importantBtn);
-
+    
         // Title
         const title = document.createElement("p");
         title.textContent = task.getTitle();
         title.classList.add("task-title");
         leftSide.appendChild(title);
-
+    
         taskContainer.appendChild(leftSide);
-
+    
         // Detail Button
         const detailsBtn = document.createElement("div");
         detailsBtn.textContent = "Details";
         detailsBtn.classList.add("task-details");
         detailsBtn.addEventListener("click", () => {
-            console.log("details");
+            this.showTaskDetails(task);
         });
         rightSide.appendChild(detailsBtn);
-
+    
         // Due Date
         const date = document.createElement("span");
         date.textContent = this.isExpose(task.getDueDate()) ? "Expired" : format(task.getDueDate(), 'dd/MM/yyyy');
         date.classList.add('task-date');
         rightSide.appendChild(date);
-
+    
         // Edit Button
         const editBtn = document.createElement("div");
         editBtn.classList.add('task-editBtn');
         editBtn.addEventListener("click", () => {
-            console.log('edit task');
-            this.initializeEditingTaskFormListeners(task);
+            const taskProject = this.findProjectForTask(task);
+            if (taskProject) {
+                this.changeProject(taskProject);
+                this.prepareFormForEditingTask(task);
+                this.openForm();
+            }
         });
         rightSide.appendChild(editBtn);
-
+    
         // Delete Button
         const deleteBtn = document.createElement("div");
         deleteBtn.classList.add('task-deleteBtn');
         deleteBtn.addEventListener("click", () => {
-            this.deleteCorrectContainer(taskContainer);
-            this.currentProject.deleteTask(task);
+            const taskProject = this.findProjectForTask(task);
+            if (taskProject) {
+                taskProject.deleteTask(task);
+                this.deleteCorrectContainer(taskContainer);
+                if (this.currentProject === null) {
+                    this.displayAllTasks();
+                } else if (projectTitle.textContent === "Today's Tasks") {
+                    this.displayTodayTasks();
+                } else if (projectTitle.textContent === "Next 7 Days Tasks") {
+                    this.displayNext7DaysTasks();
+                } else {
+                    this.updateTaskContainers();
+                }
+            }
         });
         rightSide.appendChild(deleteBtn);
-
+    
         taskContainer.appendChild(rightSide);
-
+    
         return taskContainer;
     }
+    
 
     markOrUnmark(left, right) {
         left.classList.toggle("checked");
@@ -217,6 +338,7 @@ class DomController {
     deleteCorrectContainer(container) {
         if (container && container.parentElement) {
             container.parentElement.removeChild(container);
+            this.saveToLocalStorage();
         }
     }
 
@@ -229,15 +351,8 @@ class DomController {
         }
     }
 
-    openForm(overlay, form) {
-        overlay.classList.remove("overlay-new-invisible");
-        form.classList.add("form-container-open");
-    }
-
-    closeForm(overlay, form) {
-        overlay.classList.add("overlay-new-invisible");
-        form.classList.remove("form-container-open");
-        form.reset();
+    findProjectForTask(task) {
+        return this.projects.find(project => project.getTaskById(task.getId()));
     }
 
     addingNewProject() {
@@ -275,7 +390,9 @@ class DomController {
 
         projectContainer.addEventListener("submit", (event) => {
             event.preventDefault();
-            this.createProjectContainer(new Project(title.value));
+            const newProject = new Project(title.value);
+            this.createProjectContainer(newProject);
+            this.changeProject(newProject);
             this.deleteCorrectContainer(projectContainer);
         });
 
@@ -283,9 +400,6 @@ class DomController {
             this.deleteCorrectContainer(projectContainer);
         });
 
-        projectContainer.addEventListener('mouseleave', () => {
-            this.deleteCorrectContainer(projectContainer);
-        });
     }
 
     createProjectContainer(project) {
@@ -307,7 +421,11 @@ class DomController {
 
         projectCloser.addEventListener('click', () => {
             this.deleteCorrectContainer(projectElement);
-            this.changeProject(null);
+            this.projects = this.projects.filter(p => p !== project);
+            if (this.currentProject === project) {
+                this.changeProject(this.projects.length > 0 ? this.projects[0] : null);
+            }
+            this.saveToLocalStorage();
         });
 
         projectElement.appendChild(projectTitle);
@@ -316,11 +434,201 @@ class DomController {
         if (projects) {
             projects.appendChild(projectElement);
         }
+    
+        if (!this.projects.includes(project)) {
+            this.projects.push(project);
+            this.saveToLocalStorage();
+        }
     }
 
     isExpose(date) {
         return isAfter(new Date(), date);
     }
+
+    showTaskDetails(task) {
+        const overlay = document.createElement('div');
+        overlay.classList.add('overlay-details');
+    
+        const detailWindow = document.createElement('div');
+        detailWindow.classList.add('detail-window');
+    
+        const title = document.createElement('h2');
+        title.textContent = task.getTitle();
+    
+        const description = document.createElement('p');
+        description.textContent = task.getDescription() || 'No description provided';
+    
+        const dueDate = document.createElement('p');
+        dueDate.textContent = `Due Date: ${format(task.getDueDate(), 'dd/MM/yyyy')}`;
+    
+        const projectName = document.createElement('p');
+        const project = this.findProjectForTask(task);
+        projectName.textContent = `Project: ${project ? project.getName() : 'Unknown'}`;
+    
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Close';
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+    
+        detailWindow.appendChild(title);
+        detailWindow.appendChild(description);
+        detailWindow.appendChild(dueDate);
+        detailWindow.appendChild(projectName);
+        detailWindow.appendChild(closeButton);
+    
+        overlay.appendChild(detailWindow);
+        document.body.appendChild(overlay);
+    }
+
+    displayAllTasks() {
+        const tasksContainer = document.getElementById("tasks");
+        const projectTitle = document.getElementById("project-title");
+        
+        if (tasksContainer && projectTitle) {
+            tasksContainer.innerHTML = '';
+            projectTitle.textContent = 'All Tasks';
+            
+            this.projects.forEach(project => {
+                project.getAllTasks().forEach(task => {
+                    const taskElement = this.newTaskContainer(task);
+                    const projectName = document.createElement('span');
+                    projectName.textContent = `(${project.getName()})`;
+                    projectName.classList.add('task-project-name');
+                    taskElement.querySelector('.left-side').appendChild(projectName);
+                    tasksContainer.appendChild(taskElement);
+                });
+            });
+        }
+    }
+
+    displayTodayTasks() {
+        const tasksContainer = document.getElementById("tasks");
+        const projectTitle = document.getElementById("project-title");
+        
+        if (tasksContainer && projectTitle) {
+            tasksContainer.innerHTML = '';
+            projectTitle.textContent = "Today's Tasks";
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            this.projects.forEach(project => {
+                project.getAllTasks().forEach(task => {
+                    const taskDate = new Date(task.getDueDate());
+                    taskDate.setHours(0, 0, 0, 0);
+                    
+                    if (taskDate.getTime() === today.getTime()) {
+                        const taskElement = this.newTaskContainer(task);
+                        const projectName = document.createElement('span');
+                        projectName.textContent = `(${project.getName()})`;
+                        projectName.classList.add('task-project-name');
+                        taskElement.querySelector('.left-side').appendChild(projectName);
+                        tasksContainer.appendChild(taskElement);
+                    }
+                });
+            });
+        }
+    }
+    
+    displayNext7DaysTasks() {
+        const tasksContainer = document.getElementById("tasks");
+        const projectTitle = document.getElementById("project-title");
+        
+        if (tasksContainer && projectTitle) {
+            tasksContainer.innerHTML = '';
+            projectTitle.textContent = "Next 7 Days Tasks";
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const next7Days = new Date(today);
+            next7Days.setDate(today.getDate() + 7);
+            
+            this.projects.forEach(project => {
+                project.getAllTasks().forEach(task => {
+                    const taskDate = new Date(task.getDueDate());
+                    taskDate.setHours(0, 0, 0, 0);
+                    
+                    if (taskDate >= today && taskDate <= next7Days) {
+                        const taskElement = this.newTaskContainer(task);
+                        const projectName = document.createElement('span');
+                        projectName.textContent = `(${project.getName()})`;
+                        projectName.classList.add('task-project-name');
+                        taskElement.querySelector('.left-side').appendChild(projectName);
+                        tasksContainer.appendChild(taskElement);
+                    }
+                });
+            });
+        }
+    }
+
+    displayImportantTasks() {
+        const tasksContainer = document.getElementById("tasks");
+        const projectTitle = document.getElementById("project-title");
+    
+        if (tasksContainer && projectTitle) {
+            tasksContainer.innerHTML = '';
+            projectTitle.textContent = 'Important Tasks';
+    
+            this.projects.forEach(project => {
+                project.getAllTasks().forEach(task => {
+                    if (task.getIsImportant()) {
+                        const taskElement = this.newTaskContainer(task);
+                        const projectName = document.createElement('span');
+                        projectName.textContent = `(${project.getName()})`;
+                        projectName.classList.add('task-project-name');
+                        taskElement.querySelector('.left-side').appendChild(projectName);
+                        tasksContainer.appendChild(taskElement);
+                    }
+                });
+            });
+        }
+    }
+    
+
+    saveToLocalStorage() {
+        const projectsData = this.projects.map(project => ({
+            name: project.getName(),
+            tasks: project.getAllTasks().map(task => ({
+                id: task.getId(),
+                title: task.getTitle(),
+                description: task.getDescription(),
+                dueDate: task.getDueDate().toISOString(),
+                isImportant: task.getIsImportant()
+            }))
+        }));
+        localStorage.setItem('projects', JSON.stringify(projectsData));
+        localStorage.setItem('currentProjectName', this.currentProject ? this.currentProject.getName() : '');
+    }
+    
+    
+    loadFromLocalStorage() {
+        const savedProjects = localStorage.getItem('projects');
+        const currentProjectName = localStorage.getItem('currentProjectName');
+        if (savedProjects) {
+            const projectsData = JSON.parse(savedProjects);
+            projectsData.forEach(projectData => {
+                const loadedProject = new Project(projectData.name);
+                projectData.tasks.forEach(taskData => {
+                    const task = new Task(taskData.title, taskData.description, new Date(taskData.dueDate), loadedProject.getName());
+                    task.id = taskData.id;
+                    if (taskData.isImportant) {
+                        task.changeIsImportant();
+                    }
+                    loadedProject.addNewTask(task);
+                });
+                this.projects.push(loadedProject);
+                this.createProjectContainer(loadedProject);
+            });
+            if (currentProjectName) {
+                const currentProject = this.projects.find(p => p.getName() === currentProjectName);
+                if (currentProject) {
+                    this.changeProject(currentProject);
+                }
+            }
+        }
+    }
+    
 }
 
 export default DomController;
