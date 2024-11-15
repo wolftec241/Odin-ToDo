@@ -265,6 +265,11 @@ main {
     cursor: pointer;
 }
 
+.task-title{
+    font-size: 1rem;
+    font-weight: bold;
+}
+
 /* All checked elements */
 
 .checked{
